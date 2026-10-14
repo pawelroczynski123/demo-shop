@@ -27,6 +27,16 @@ function renderProduct(){
   const p=findProduct(new URLSearchParams(location.search).get("id")); if(!p){ box.textContent="Nie znaleziono produktu."; return; }
   box.innerHTML = `<div class="card"><div class="pic">${p.icon}</div><h1>${p.name}</h1><div>${p.category}</div>
     <p class="price">${money(p.price)}</p><button class="btn add-to-cart" data-product-id="${p.id}">Dodaj do koszyka</button></div>`;
+    window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ ecommerce: null });
+  window.dataLayer.push({
+    event: "view_item",
+    ecommerce: {
+      currency: "PLN",
+      value: p.price,
+      items: [{ item_id: p.id, item_name: p.name, item_category: p.category, price: p.price, quantity: 1 }]
+    }
+  });
   box.querySelector(".add-to-cart").addEventListener("click", () => {
     addToCart(p.id);
     // Zdarzenie dla GTM/GA4 w formacie e-commerce GA4
