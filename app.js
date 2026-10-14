@@ -76,6 +76,21 @@ function renderThanks(){
   const v=document.getElementById("thanks-view"); if(!v) return;
   const o=JSON.parse(localStorage.getItem("lastOrder")||"null");
   v.innerHTML = o ? `<h1>Dziękujemy za zamówienie!</h1><p>Numer zamówienia: <strong>${o.id}</strong></p><p>Wartość: ${money(o.total)}</p><a class="btn" href="index.html">Wróć do sklepu</a>` : "<p>Brak zamówienia.</p>";
+  // purchase wysyłamy tylko raz dla danego zamówienia
+  if (o && localStorage.getItem("trackedOrder") !== o.id) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: "purchase",
+      ecommerce: {
+        transaction_id: o.id,
+        currency: "PLN",
+        value: o.total,
+        items: o.items.map(i => { const p = findProduct(i.id); return { item_id: p.id, item_name: p.name, item_category: p.category, price: p.price, quantity: i.qty }; })
+      }
+    });
+    localStorage.setItem("trackedOrder", o.id);
+  }
 }
 function setupContact(){
   const f=document.getElementById("contact-form"); if(!f) return;
