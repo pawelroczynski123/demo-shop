@@ -65,6 +65,19 @@ function renderCart(){
 function renderCheckout(){
   const s=document.getElementById("checkout-summary"); if(!s) return;
   s.innerHTML = `<p>Wartość zamówienia: <strong>${money(cartTotal())}</strong></p>`;
+    const cartNow = getCart();
+  if (cartNow.length) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: "begin_checkout",
+      ecommerce: {
+        currency: "PLN",
+        value: cartTotal(),
+        items: cartNow.map(i => { const p = findProduct(i.id); return { item_id: p.id, item_name: p.name, item_category: p.category, price: p.price, quantity: i.qty }; })
+      }
+    });
+  }
   document.getElementById("checkout-form").addEventListener("submit", e=>{
     e.preventDefault(); if(!getCart().length){ alert("Koszyk jest pusty"); return; }
     const order={id:"T"+Date.now(), total:cartTotal(), items:getCart()};
