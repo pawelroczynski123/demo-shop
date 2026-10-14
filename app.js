@@ -14,7 +14,7 @@ const findProduct = id => PRODUCTS.find(p => p.id === id);
 function updateCount(){ const el=document.getElementById("cart-count"); if(el) el.textContent=getCart().reduce((s,i)=>s+i.qty,0); }
 function addToCart(id){ const c=getCart(); const it=c.find(i=>i.id===id); if(it) it.qty++; else c.push({id,qty:1}); saveCart(c); }
 function cartTotal(){ return getCart().reduce((s,i)=>s+findProduct(i.id).price*i.qty,0); }
-
+ 
 function renderGrid(){
   const g=document.getElementById("product-grid"); if(!g) return;
   g.innerHTML = PRODUCTS.map(p => `<div class="card product-card" data-product-id="${p.id}">
@@ -27,7 +27,21 @@ function renderProduct(){
   const p=findProduct(new URLSearchParams(location.search).get("id")); if(!p){ box.textContent="Nie znaleziono produktu."; return; }
   box.innerHTML = `<div class="card"><div class="pic">${p.icon}</div><h1>${p.name}</h1><div>${p.category}</div>
     <p class="price">${money(p.price)}</p><button class="btn add-to-cart" data-product-id="${p.id}">Dodaj do koszyka</button></div>`;
-  box.querySelector(".add-to-cart").addEventListener("click", () => { addToCart(p.id); alert("Dodano do koszyka"); });
+  box.querySelector(".add-to-cart").addEventListener("click", () => {
+    addToCart(p.id);
+    // Zdarzenie dla GTM/GA4 w formacie e-commerce GA4
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null }); // czyści poprzednie dane e-commerce
+    window.dataLayer.push({
+      event: "add_to_cart",
+      ecommerce: {
+        currency: "PLN",
+        value: p.price,
+        items: [{ item_id: p.id, item_name: p.name, item_category: p.category, price: p.price, quantity: 1 }]
+      }
+    });
+    alert("Dodano do koszyka");
+  });
 }
 function renderCart(){
   const v=document.getElementById("cart-view"); if(!v) return; const c=getCart();
